@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>美团商品 ↔ DrugID 对码工作台</title>
+  <!-- 发版时修改 window.APP_ASSET_VERSION，静态地址请拼接 ?v=版本号 -->
+  <script>
+    window.APP_ASSET_VERSION = '10.0.1';
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <style>
+    :root {
+      --bg: #f4f6f9;
+      --panel: #ffffff;
+      --border: #e2e8f0;
+      --text: #0f172a;
+      --muted: #64748b;
+      --meituan: #ffc300;
+      --meituan-dark: #e6a800;
+      --drug: #0d9488;
+      --drug-soft: #ccfbf1;
+      --danger: #dc2626;
+      --shadow: 0 10px 40px rgba(15, 23, 42, 0.08);
+      --radius: 14px;
+      --bookmark-w: 168px;
+      --tab-out: 10px;
+      --font: 'Noto Sans SC', 'DM Sans', system-ui, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+      margin: 0;
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .app {
+      display: flex;
+      flex-direction: column;
+      min-height: 100%;
+      max-width: 1680px;
+      margin: 0 auto;
+      padding: 16px 16px 16px 20px;
+      gap: 12px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .topbar h1 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin: 0;
+      letter-spacing: 0.02em;
+    }
+
+    .badge {
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      color: var(--muted);
+    }
+
+    .main {
+      flex: 1;
+      display: flex;
+      gap: 0;
+      min-height: 0;
+      border-radius: var(--radius);
+      overflow: visible;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+      background: var(--panel);
+      position: relative;
+      z-index: 0;
+      isolation: isolate;
+    }
+
+    /* 左侧美团 */
+    .col-meituan {
+      flex: 0 0 38%;
+      min-width: 280px;
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      background: linear-gradient(180deg, #fffdf5 0%, #fff 40%);
+      position: relative;
+      z-index: 1;
+      border-radius: var(--radius) 0 0 var(--radius);
+      overflow: hidden;
+    }
+
+    .col-head {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .pill-meituan {
+      background: var(--meituan);
+      color: #1a1a1a;
+      font-weight: 700;
+      font-size: 0.75rem;
+      padding: 4px 10px;
+      border-radius: 8px;
+    }
+
+    .col-body {
+      padding: 16px 18px;
+      overflow: auto;
+      flex: 1;
+    }
+
+    .product-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      line-height: 1.35;
+      margin: 0 0 12px;
+    }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .meta-card {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+    }
+
+    .meta-card.full {
+      grid-column: 1 / -1;
+    }
+
+    .meta-label {
+      font-size: 0.68rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 4px;
+    }
+
+    .meta-value {
+      font-size: 0.9rem;
+      font-weight: 600;
+      word-break: break-all;
+    }
+
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .gallery img {
+      width: 100%;
+      aspect-ratio: 1;
+      object-fit: cover;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: #f1f5f9;
+    }
+
+    /* 中间 Drug 展示区 */
+    .col-drugs {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      background: #fafbfc;
+      position: relative;
+      z-index: 1;
+      overflow: hidden;
+    }
+
+    .drug-head {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--panel);
+    }
+
+    .pill-drug {
+      background: var(--drug-soft);
+      color: #0f766e;
+      font-weight: 700;
+      font-size: 0.72rem;
+      padding: 4px 10px;
+      border-radius: 8px;
+    }
+
+    .drug-grid {
+      flex: 1;
+      min-height: 360px;
+      min-width: 0;
+      padding: 12px;
+      gap: 10px;
+      overflow: auto;
+    }
+
+    /* 1～3 分区：横向等分 */
+    .drug-grid[data-slots='1'],
+    .drug-grid[data-slots='2'],
+    .drug-grid[data-slots='3'] {
+      display: flex;
+      flex-direction: row;
+    }
+
+    /* 4 分区：田字格（2×2） */
+    .drug-grid[data-slots='4'] {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-rows: repeat(2, minmax(0, 1fr));
+      align-content: stretch;
+    }
+
+    .drug-grid[data-slots='4'] .drug-slot {
+      flex: none;
+      min-height: 0;
+    }
+
+    .drug-slot {
+      flex: 1;
+      min-width: 0;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
+    }
+
+    .drug-slot-inner {
+      padding: 12px;
+      overflow: auto;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    /* 分区数量驱动图片尺寸 */
+    .drug-grid[data-slots='1'] .gallery-drug {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .drug-grid[data-slots='1'] .gallery-drug img {
+      max-height: clamp(140px, 28vh, 260px);
+    }
+
+    .drug-grid[data-slots='2'] .gallery-drug {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .drug-grid[data-slots='2'] .gallery-drug img {
+      max-height: clamp(100px, 18vh, 180px);
+    }
+
+    .drug-grid[data-slots='3'] .gallery-drug,
+    .drug-grid[data-slots='4'] .gallery-drug {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .drug-grid[data-slots='3'] .gallery-drug img {
+      max-height: clamp(72px, 12vh, 120px);
+    }
+
+    .drug-grid[data-slots='4'] .gallery-drug img {
+      max-height: clamp(56px, 10vh, 96px);
+    }
+
+    .gallery-drug {
+      display: grid;
+      gap: 6px;
+    }
+
+    .gallery-drug img {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 1;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+
+    .drug-title {
+      font-size: clamp(0.78rem, 1.1vw, 0.95rem);
+      font-weight: 700;
+      line-height: 1.3;
+      margin: 0;
+    }
+
+    .meta-grid-drug {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 6px;
+    }
+
+    .drug-grid[data-slots='1'] .meta-grid-drug {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .meta-tiny {
+      font-size: clamp(0.65rem, 0.9vw, 0.78rem);
+      padding: 6px 8px;
+      border-radius: 8px;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+    }
+
+    .meta-tiny .l {
+      color: var(--muted);
+      font-size: 0.65em;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+
+    /* 右侧书签栏（叠在最上层，避免被中间商品卡片压住） */
+    .col-bookmarks {
+      flex: 0 0 var(--bookmark-w);
+      border-left: 1px solid var(--border);
+      background: #f1f5f9;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      position: relative;
+      z-index: 40;
+      box-shadow: -6px 0 24px rgba(15, 23, 42, 0.06);
+      border-radius: 0 var(--radius) var(--radius) 0;
+      overflow: visible;
+    }
+
+    .bm-head {
+      padding: 10px 12px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+      background: #e2e8f0;
+    }
+
+    .bm-list {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: visible;
+      padding: 10px 8px 12px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      position: relative;
+      z-index: 41;
+    }
+
+    .bm-card {
+      position: relative;
+      z-index: 1;
+      margin-left: 4px;
+      padding: 10px 10px 10px 12px;
+      border-radius: 0 10px 10px 0;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-left: none;
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+      transition: margin-left 0.2s ease, box-shadow 0.2s ease, border-color 0.2s, z-index 0.2s;
+    }
+
+    .bm-card.is-visible {
+      z-index: 50;
+      margin-left: calc(-1 * var(--tab-out));
+      border-color: var(--drug);
+      box-shadow: 0 4px 14px rgba(13, 148, 136, 0.18);
+    }
+
+    .bm-id {
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: var(--drug);
+      margin-bottom: 4px;
+    }
+
+    .bm-name {
+      font-size: 0.78rem;
+      font-weight: 600;
+      line-height: 1.35;
+      margin-bottom: 8px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .bm-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .btn {
+      font-family: inherit;
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 7px 8px;
+      border-radius: 8px;
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s, transform 0.1s;
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    .btn-primary {
+      background: var(--drug);
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background: #0f766e;
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .btn-secondary {
+      background: #fff;
+      border-color: var(--border);
+      color: var(--text);
+    }
+
+    .btn-secondary:hover {
+      background: #f8fafc;
+    }
+
+    .btn-ghost {
+      background: transparent;
+      border-color: var(--border);
+      color: var(--muted);
+    }
+
+    .btn-danger {
+      background: #fef2f2;
+      border-color: #fecaca;
+      color: var(--danger);
+    }
+
+    .btn-danger:hover {
+      background: #fee2e2;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(120%);
+      background: #1e293b;
+      color: #fff;
+      padding: 10px 18px;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      box-shadow: var(--shadow);
+      opacity: 0;
+      transition: transform 0.25s ease, opacity 0.25s ease;
+      z-index: 100;
+      pointer-events: none;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    @media (max-width: 1024px) {
+      .main {
+        flex-direction: column;
+      }
+      .col-meituan {
+        flex: none;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+        max-height: 45vh;
+      }
+      .col-bookmarks {
+        flex: none;
+        border-left: none;
+        border-top: 1px solid var(--border);
+        max-height: 220px;
+      }
+      .bm-list {
+        flex-direction: row;
+        overflow-x: auto;
+        padding: 10px 12px;
+      }
+      .bm-card {
+        min-width: 148px;
+        margin-left: 0;
+        border-left: 1px solid var(--border);
+        border-radius: 10px;
+      }
+      .bm-card.is-visible {
+        margin-left: 0;
+        margin-top: -6px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="topbar">
+      <h1>美团商品 ↔ DrugID 对码工作台 <span class="badge">纯前端 Demo · 进度已本地保存</span></h1>
+      <span class="badge" id="versionLabel"></span>
+    </div>
+    <div class="main" id="main">
+      <section class="col-meituan" id="meituanCol"></section>
+      <section class="col-drugs">
+        <div class="drug-head">
+          <span class="pill-drug">待匹配 DrugID</span>
+          <span style="font-size:0.8rem;color:var(--muted)">最多 4 区对比；满 4 区为田字格 · 最右书签控制展示</span>
+        </div>
+        <div class="drug-grid" id="drugGrid" data-slots="1"></div>
+      </section>
+      <aside class="col-bookmarks">
+        <div class="bm-head">DrugID 书签</div>
+        <div class="bm-list" id="bookmarkList"></div>
+      </aside>
+    </div>
+  </div>
+  <div class="toast" id="toast" role="status"></div>
+
+  <script>
+    (function () {
+      var VERSION = String(window.APP_ASSET_VERSION || '10.0.1');
+      (function injectFont() {
+        var href =
+          'https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600;0,9..40,700;1,9..40,400&family=Noto+Sans+SC:wght@400;500;600;700&display=swap&v=' +
+          encodeURIComponent(VERSION);
+        var l = document.createElement('link');
+        l.rel = 'stylesheet';
+        l.href = href;
+        document.head.appendChild(l);
+      })();
+      /** 进度与资源版本解耦：改 APP_ASSET_VERSION 只影响静态资源缓存，不会清空已对码展示状态 */
+      var STORAGE_KEY = 'meituan_drug_match_demo_state';
+
+      /** 演示数据：左侧唯一美团商品；右侧多条 DrugID 候选 */
+      var MEITUAN_PRODUCT = {
+        id: 'mt-001',
+        name: '阿莫西林胶囊 0.25g*24粒/盒',
+        spec: '0.25g*24粒',
+        barcode: '6921168509926',
+        approvalNo: '国药准字H11030263',
+        manufacturer: '某某制药有限公司',
+        rxCategory: '处方',
+        images: [
+          'https://picsum.photos/seed/mt-a1/600/600?v=' + VERSION,
+          'https://picsum.photos/seed/mt-a2/600/600?v=' + VERSION,
+          'https://picsum.photos/seed/mt-a3/600/600?v=' + VERSION,
+          'https://picsum.photos/seed/mt-a4/600/600?v=' + VERSION,
+          'https://picsum.photos/seed/mt-a5/600/600?v=' + VERSION,
+          'https://picsum.photos/seed/mt-a6/600/600?v=' + VERSION
+        ]
+      };
+
+      var DRUG_CANDIDATES = [
+        {
+          id: 'drug-a',
+          drugId: 'DRUG-10086001',
+          name: '阿莫西林胶囊',
+          spec: '0.25g×24粒',
+          barcode: '6930000000001',
+          approvalNo: '国药准字H13020189',
+          manufacturer: '华北某制药厂',
+          rxCategory: '处方',
+          images: [
+            'https://picsum.photos/seed/da1/500/500?v=' + VERSION,
+            'https://picsum.photos/seed/da2/500/500?v=' + VERSION,
+            'https://picsum.photos/seed/da3/500/500?v=' + VERSION
+          ]
+        },
+        {
+          id: 'drug-b',
+          drugId: 'DRUG-10086002',
+          name: '阿莫西林胶囊（联邦）',
+          spec: '0.25g*24粒/盒',
+          barcode: '6930000000002',
+          approvalNo: '国药准字H44021345',
+          manufacturer: '联邦制药',
+          rxCategory: '处方',
+          images: [
+            'https://picsum.photos/seed/db1/500/500?v=' + VERSION,
+            'https://picsum.photos/seed/db2/500/500?v=' + VERSION
+          ]
+        },
+        {
+          id: 'drug-c',
+          drugId: 'DRUG-10086003',
+          name: '阿莫西林胶囊',
+          spec: '0.25g×20粒',
+          barcode: '6930000000003',
+          approvalNo: '国药准字H20040012',
+          manufacturer: '华南某药业',
+          rxCategory: '非处方',
+          images: [
+            'https://picsum.photos/seed/dc1/500/500?v=' + VERSION,
+            'https://picsum.photos/seed/dc2/500/500?v=' + VERSION,
+            'https://picsum.photos/seed/dc3/500/500?v=' + VERSION,
+            'https://picsum.photos/seed/dc4/500/500?v=' + VERSION
+          ]
+        },
+        {
+          id: 'drug-d',
+          drugId: 'DRUG-10086004',
+          name: '阿莫西林颗粒',
+          spec: '0.125g×12袋',
+          barcode: '6930000000004',
+          approvalNo: '国药准字H36021998',
+          manufacturer: '儿童专用线',
+          rxCategory: '其他',
+          images: [
+            'https://picsum.photos/seed/dd1/500/500?v=' + VERSION
+          ]
+        },
+        {
+          id: 'drug-e',
+          drugId: 'DRUG-10086005',
+          name: '阿莫西林胶囊',
+          spec: '0.5g×12粒',
+          barcode: '6930000000005',
+          approvalNo: '国药准字H51030677',
+          manufacturer: '西部某生物制药',
+          rxCategory: '处方',
+          images: [
+            'https://picsum.photos/seed/de1/500/500?v=' + VERSION,
+            'https://picsum.photos/seed/de2/500/500?v=' + VERSION,
+            'https://picsum.photos/seed/de3/500/500?v=' + VERSION,
+            'https://picsum.photos/seed/de4/500/500?v=' + VERSION,
+            'https://picsum.photos/seed/de5/500/500?v=' + VERSION,
+            'https://picsum.photos/seed/de6/500/500?v=' + VERSION
+          ]
+        }
+      ];
+
+      var MAX_SLOTS = 4;
+
+      function loadState() {
+        try {
+          var raw = localStorage.getItem(STORAGE_KEY);
+          if (!raw) return null;
+          return JSON.parse(raw);
+        } catch (e) {
+          return null;
+        }
+      }
+
+      function saveState(state) {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        } catch (e) {}
+      }
+
+      function defaultState() {
+        return { visibleDrugIds: [DRUG_CANDIDATES[0].id] };
+      }
+
+      function normalizeState(s) {
+        var d = defaultState();
+        if (!s || !Array.isArray(s.visibleDrugIds)) return d;
+        var ids = s.visibleDrugIds.filter(function (id) {
+          return DRUG_CANDIDATES.some(function (c) { return c.id === id; });
+        });
+        if (ids.length === 0) return d;
+        if (ids.length > MAX_SLOTS) ids = ids.slice(0, MAX_SLOTS);
+        return { visibleDrugIds: ids };
+      }
+
+      var state = normalizeState(loadState() || defaultState());
+
+      function persist() {
+        saveState(state);
+      }
+
+      function drugById(id) {
+        for (var i = 0; i < DRUG_CANDIDATES.length; i++) {
+          if (DRUG_CANDIDATES[i].id === id) return DRUG_CANDIDATES[i];
+        }
+        return null;
+      }
+
+      function isVisible(id) {
+        return state.visibleDrugIds.indexOf(id) !== -1;
+      }
+
+      function showToast(msg) {
+        var el = document.getElementById('toast');
+        el.textContent = msg;
+        el.classList.add('show');
+        clearTimeout(showToast._t);
+        showToast._t = setTimeout(function () {
+          el.classList.remove('show');
+        }, 2200);
+      }
+
+      function onlyShow(id) {
+        state.visibleDrugIds = [id];
+        persist();
+        renderAll();
+      }
+
+      function addToDisplay(id) {
+        if (isVisible(id)) return;
+        if (state.visibleDrugIds.length >= MAX_SLOTS) {
+          showToast('最多同时展示 4 个 DrugID 分区');
+          return;
+        }
+        state.visibleDrugIds.push(id);
+        persist();
+        renderAll();
+      }
+
+      function removeFromDisplay(id) {
+        var idx = state.visibleDrugIds.indexOf(id);
+        if (idx === -1) return;
+        state.visibleDrugIds.splice(idx, 1);
+        if (state.visibleDrugIds.length === 0) {
+          state.visibleDrugIds = [DRUG_CANDIDATES[0].id];
+        }
+        persist();
+        renderAll();
+      }
+
+      function renderMeituan() {
+        var el = document.getElementById('meituanCol');
+        var imgs = MEITUAN_PRODUCT.images.slice(0, 6);
+        el.innerHTML =
+          '<div class="col-head">' +
+          '<span class="pill-meituan">美团商品</span>' +
+          '<span style="font-size:0.8rem;color:var(--muted)">唯一资料 · 对码参考</span>' +
+          '</div>' +
+          '<div class="col-body">' +
+          '<h2 class="product-title">' + escapeHtml(MEITUAN_PRODUCT.name) + '</h2>' +
+          '<div class="meta-grid">' +
+          metaCard('规格', MEITUAN_PRODUCT.spec, false) +
+          metaCard('条形码', MEITUAN_PRODUCT.barcode, false) +
+          metaCard('批准文号', MEITUAN_PRODUCT.approvalNo, true) +
+          metaCard('生产厂家', MEITUAN_PRODUCT.manufacturer, false) +
+          metaCard('处方分类', MEITUAN_PRODUCT.rxCategory, false) +
+          '</div>' +
+          '<div class="meta-label" style="margin-bottom:6px">商品图片（最多 6 张）</div>' +
+          '<div class="gallery">' +
+          imgs.map(function (src) {
+            return '<img src="' + escapeAttr(src) + '" alt="" loading="lazy" />';
+          }).join('') +
+          '</div></div>';
+      }
+
+      function metaCard(label, val, full) {
+        return (
+          '<div class="meta-card' + (full ? ' full' : '') + '">' +
+          '<div class="meta-label">' + escapeHtml(label) + '</div>' +
+          '<div class="meta-value">' + escapeHtml(val) + '</div></div>'
+        );
+      }
+
+      function escapeHtml(s) {
+        return String(s)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;');
+      }
+
+      function escapeAttr(s) {
+        return escapeHtml(s).replace(/'/g, '&#39;');
+      }
+
+      function renderDrugGrid() {
+        var grid = document.getElementById('drugGrid');
+        var n = state.visibleDrugIds.length;
+        var slots = Math.min(MAX_SLOTS, Math.max(1, n));
+        grid.setAttribute('data-slots', String(slots));
+        var html = '';
+        for (var i = 0; i < n; i++) {
+          var d = drugById(state.visibleDrugIds[i]);
+          if (d) html += renderDrugSlot(d);
+        }
+        grid.innerHTML = html;
+      }
+
+      function renderDrugSlot(d) {
+        var imgs = (d.images || []).slice(0, 6);
+        var meta =
+          '<div class="meta-grid-drug">' +
+          tiny('规格', d.spec) +
+          tiny('条形码', d.barcode) +
+          tiny('批准文号', d.approvalNo || '—') +
+          tiny('生产厂家', d.manufacturer) +
+          tiny('处方分类', d.rxCategory || '其他') +
+          '</div>';
+        var gal =
+          '<div class="gallery-drug">' +
+          imgs
+            .map(function (src) {
+              return '<img src="' + escapeAttr(src) + '" alt="" loading="lazy" />';
+            })
+            .join('') +
+          '</div>';
+        return (
+          '<div class="drug-slot">' +
+          '<div class="drug-slot-inner">' +
+          '<div class="drug-id" style="font-size:0.7rem;font-weight:700;color:var(--drug)">' +
+          escapeHtml(d.drugId) +
+          '</div>' +
+          '<h3 class="drug-title">' +
+          escapeHtml(d.name) +
+          '</h3>' +
+          meta +
+          gal +
+          '</div></div>'
+        );
+      }
+
+      function tiny(label, val) {
+        return (
+          '<div class="meta-tiny"><div class="l">' +
+          escapeHtml(label) +
+          '</div><div style="font-weight:600;word-break:break-all">' +
+          escapeHtml(val) +
+          '</div></div>'
+        );
+      }
+
+      function renderBookmarks() {
+        var list = document.getElementById('bookmarkList');
+        list.innerHTML = DRUG_CANDIDATES.map(function (c) {
+          var visible = isVisible(c.id);
+          var joinLabel = visible ? '退出展示' : '加入展示';
+          var joinClass = visible ? 'btn btn-danger' : 'btn btn-primary';
+          var joinHandler = visible
+            ? 'onclick="window.__app.remove(\'' + c.id + '\')"'
+            : 'onclick="window.__app.add(\'' + c.id + '\')"';
+          var disabledAdd =
+            !visible && state.visibleDrugIds.length >= MAX_SLOTS ? ' disabled' : '';
+          return (
+            '<div class="bm-card' + (visible ? ' is-visible' : '') + '" data-id="' +
+            escapeAttr(c.id) +
+            '">' +
+            '<div class="bm-id">' +
+            escapeHtml(c.drugId) +
+            '</div>' +
+            '<div class="bm-name">' +
+            escapeHtml(c.name) +
+            '</div>' +
+            '<div class="bm-actions">' +
+            '<button type="button" class="btn btn-secondary" onclick="window.__app.only(\'' +
+            c.id +
+            '\')">仅展示</button>' +
+            '<button type="button" class="' +
+            joinClass +
+            '"' +
+            joinHandler +
+            disabledAdd +
+            '>' +
+            joinLabel +
+            '</button>' +
+            '</div></div>'
+          );
+        }).join('');
+      }
+
+      function renderAll() {
+        renderMeituan();
+        renderDrugGrid();
+        renderBookmarks();
+      }
+
+      window.__app = {
+        only: function (id) {
+          onlyShow(id);
+        },
+        add: function (id) {
+          addToDisplay(id);
+        },
+        remove: function (id) {
+          removeFromDisplay(id);
+        }
+      };
+
+      document.getElementById('versionLabel').textContent = '资源版本 v' + VERSION;
+      renderAll();
+    })();
+  </script>
+</body>
+</html>
