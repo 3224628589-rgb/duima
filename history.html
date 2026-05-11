@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>匹配历史</title>
+  <script>
+    window.APP_ASSET_VERSION = '10.0.1';
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <style>
+    :root {
+      --bg: #f4f6f9;
+      --panel: #fff;
+      --border: #e2e8f0;
+      --text: #0f172a;
+      --muted: #64748b;
+      --drug: #0d9488;
+      --drug-soft: #ccfbf1;
+      --shadow: 0 10px 40px rgba(15, 23, 42, 0.08);
+      --radius: 12px;
+      --font: 'Noto Sans SC', system-ui, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .layout {
+      display: flex;
+      min-height: 100vh;
+      width: 100%;
+    }
+
+    .system-sidebar {
+      flex: 0 0 220px;
+      background: #111827;
+      color: #cbd5e1;
+      padding: 18px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      box-shadow: 8px 0 30px rgba(15, 23, 42, 0.12);
+    }
+
+    .system-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 4px 6px 14px;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+    }
+
+    .system-logo-mark {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, var(--drug), #22c55e);
+      color: #fff;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+    }
+
+    .system-logo-text {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.25;
+    }
+
+    .system-logo-text strong {
+      color: #fff;
+      font-size: 0.96rem;
+    }
+
+    .system-logo-text span {
+      font-size: 0.72rem;
+      color: #94a3b8;
+    }
+
+    .side-section-title {
+      margin: 0 8px 8px;
+      color: #64748b;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+    }
+
+    .side-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .side-link {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      color: #cbd5e1;
+      text-decoration: none;
+      font-size: 0.86rem;
+      font-weight: 600;
+    }
+
+    .side-link:hover {
+      background: rgba(148, 163, 184, 0.12);
+      color: #fff;
+    }
+
+    .side-link.is-active {
+      background: rgba(13, 148, 136, 0.22);
+      color: #fff;
+      box-shadow: inset 3px 0 0 var(--drug);
+    }
+
+    .side-footer {
+      margin-top: auto;
+      padding: 12px;
+      border-radius: 12px;
+      background: rgba(15, 23, 42, 0.55);
+      border: 1px solid rgba(148, 163, 184, 0.16);
+      font-size: 0.72rem;
+      color: #94a3b8;
+      line-height: 1.6;
+    }
+
+    .page {
+      flex: 1;
+      min-width: 0;
+      max-width: none;
+      margin: 0 auto;
+      padding: 20px 16px 40px;
+    }
+
+    .head {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .head h1 {
+      margin: 0;
+      font-size: 1.2rem;
+    }
+
+    .back {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--drug);
+      text-decoration: none;
+      padding: 8px 14px;
+      border-radius: 8px;
+      background: var(--drug-soft);
+      border: 1px solid #99f6e4;
+    }
+
+    .back:hover {
+      background: #99f6e4;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      margin-bottom: 14px;
+      overflow: hidden;
+    }
+
+    .filter {
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .filter-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+
+    .filter-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 12px;
+      align-items: end;
+    }
+
+    .field label {
+      display: block;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    .field input {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 0.85rem;
+    }
+
+    .filter-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      font-family: inherit;
+      font-size: 0.82rem;
+      font-weight: 600;
+      padding: 8px 14px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: #fff;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background: var(--drug);
+      color: #fff;
+      border-color: var(--drug);
+    }
+
+    .btn-primary:hover {
+      background: #0f766e;
+    }
+
+    .btn-export {
+      border-color: #99f6e4;
+      background: #f0fdfa;
+      color: #0f766e;
+    }
+
+    .btn-export:hover {
+      background: #ccfbf1;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid var(--border);
+      background: #f8fafc;
+    }
+
+    .tab {
+      flex: 1;
+      min-width: 0;
+      padding: 12px 10px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      text-align: center;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      font-family: inherit;
+    }
+
+    .tab:hover {
+      color: var(--text);
+    }
+
+    .tab.is-active {
+      color: var(--drug);
+      border-bottom-color: var(--drug);
+      background: var(--panel);
+    }
+
+    .list-wrap {
+      padding: 0;
+    }
+
+    .empty {
+      padding: 48px 20px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .pagination {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+      padding: 12px 18px 14px;
+      border-top: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.45);
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+
+    .page-btn {
+      min-width: 30px;
+      height: 30px;
+      padding: 0 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.82);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .page-btn:hover:not(:disabled) {
+      border-color: rgba(0, 136, 255, 0.5);
+      color: #0088FF;
+    }
+
+    .page-btn.is-active {
+      background: #0088FF;
+      border-color: #0088FF;
+      color: #fff;
+      box-shadow: 0 8px 18px rgba(0, 136, 255, 0.22);
+    }
+
+    .page-btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+    }
+
+    th, td {
+      padding: 10px 14px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    th {
+      background: #f8fafc;
+      font-weight: 700;
+      color: var(--muted);
+      font-size: 0.72rem;
+    }
+
+    tr:hover td {
+      background: #fafafa;
+    }
+
+    .mono {
+      font-family: ui-monospace, monospace;
+      font-size: 0.78rem;
+      word-break: break-all;
+    }
+
+    .hint {
+      font-size: 0.72rem;
+      color: var(--muted);
+      padding: 10px 18px;
+      background: #fffbeb;
+      border-top: 1px solid #fde68a;
+    }
+
+    .card[data-tab='pending'] .filter-drugid,
+    .card[data-tab='pending'] .filter-time,
+    .card[data-tab='new_drug'] .filter-drugid {
+      display: none;
+    }
+
+    @media (max-width: 1024px) {
+      .layout {
+        flex-direction: column;
+      }
+      .system-sidebar {
+        flex: none;
+        padding: 10px 12px;
+      }
+      .system-logo {
+        padding-bottom: 8px;
+      }
+      .side-nav {
+        flex-direction: row;
+        overflow-x: auto;
+      }
+      .side-link {
+        white-space: nowrap;
+      }
+      .side-footer {
+        display: none;
+      }
+    }
+    /* High fidelity UI skin: consistent with the audit workbench */
+    body {
+      background:
+        radial-gradient(circle at 14% 10%, rgba(255, 255, 255, 0.75) 0, transparent 28%),
+        radial-gradient(circle at 84% 18%, rgba(124, 92, 255, 0.18) 0, transparent 24%),
+        linear-gradient(135deg, #a9bfca 0%, #dbe7ed 46%, #f4f7f8 100%);
+    }
+
+    .layout {
+      gap: 18px;
+      padding: 18px;
+    }
+
+    .system-sidebar {
+      flex-basis: 232px;
+      border-radius: 30px;
+      background: rgba(247, 250, 252, 0.78);
+      color: #334155;
+      border: 1px solid rgba(255, 255, 255, 0.78);
+      box-shadow: 0 24px 70px rgba(29, 47, 64, 0.16);
+      backdrop-filter: blur(18px);
+    }
+
+    .system-logo {
+      border-bottom-color: rgba(51, 65, 85, 0.08);
+    }
+
+    .system-logo-mark {
+      background: linear-gradient(135deg, #0088FF, #33A0FF);
+      box-shadow: 0 12px 26px rgba(0, 136, 255, 0.24);
+    }
+
+    .system-logo-text strong {
+      color: #182230;
+    }
+
+    .system-logo-text span,
+    .side-section-title,
+    .side-footer {
+      color: #7a8797;
+    }
+
+    .side-link {
+      color: #334155;
+      border: 1px solid transparent;
+    }
+
+    .side-link:hover {
+      color: #1d2530;
+      background: rgba(255, 255, 255, 0.72);
+      border-color: rgba(255, 255, 255, 0.82);
+    }
+
+    .side-link.is-active {
+      color: #fff;
+      background: linear-gradient(135deg, #0088FF, #006FD6);
+      box-shadow: 0 14px 30px rgba(0, 136, 255, 0.24);
+    }
+
+    .side-footer {
+      background: rgba(255, 255, 255, 0.58);
+      border-color: rgba(255, 255, 255, 0.72);
+    }
+
+    .page {
+      border-radius: 34px;
+      padding: 18px;
+      background: rgba(248, 251, 252, 0.72);
+      border: 1px solid rgba(255, 255, 255, 0.78);
+      box-shadow: 0 26px 80px rgba(29, 47, 64, 0.17);
+      backdrop-filter: blur(18px);
+    }
+
+    .head {
+      min-height: 56px;
+      padding: 0 8px 4px;
+    }
+
+    .head h1 {
+      font-size: clamp(1.35rem, 2.2vw, 2.15rem);
+      line-height: 1.05;
+      color: #1f2937;
+      letter-spacing: -0.04em;
+    }
+
+    .back,
+    .btn {
+      border-radius: 999px;
+      box-shadow: 0 8px 18px rgba(29, 47, 64, 0.08);
+    }
+
+    .back {
+      color: #0088FF;
+      background: rgba(255, 255, 255, 0.66);
+      border: 1px solid rgba(255, 255, 255, 0.76);
+    }
+
+    .card {
+      border-radius: 28px;
+      border: 1px solid rgba(255, 255, 255, 0.82);
+      background: rgba(255, 255, 255, 0.72);
+      box-shadow: 0 18px 52px rgba(29, 47, 64, 0.12);
+    }
+
+    .filter {
+      background:
+        radial-gradient(circle at 4% 0%, rgba(0, 136, 255, 0.1) 0, transparent 28%),
+        rgba(255, 255, 255, 0.48);
+    }
+
+    .filter-title {
+      color: #0088FF;
+      letter-spacing: 0.08em;
+    }
+
+    .field input {
+      border-radius: 14px;
+      border-color: rgba(226, 232, 240, 0.9);
+      background: rgba(255, 255, 255, 0.78);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+      outline: none;
+      transition: border-color 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .field input:focus {
+      border-color: rgba(0, 136, 255, 0.66);
+      box-shadow: 0 0 0 3px rgba(0, 136, 255, 0.12);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #0088FF, #006FD6);
+      border-color: transparent;
+      box-shadow: 0 12px 24px rgba(0, 136, 255, 0.22);
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #0078E6, #0062C2);
+    }
+
+    .btn-export {
+      border-color: rgba(34, 211, 182, 0.38);
+      background: rgba(240, 253, 250, 0.88);
+      box-shadow: 0 10px 20px rgba(15, 118, 110, 0.1);
+    }
+
+    .tabs {
+      padding: 8px;
+      gap: 8px;
+      background: rgba(244, 247, 249, 0.66);
+    }
+
+    .tab {
+      border-radius: 999px;
+      margin-bottom: 0;
+      border-bottom: none;
+      transition: background 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .tab.is-active {
+      color: #fff;
+      background: linear-gradient(135deg, #0088FF, #006FD6);
+      box-shadow: 0 10px 24px rgba(0, 136, 255, 0.2);
+      border-bottom-color: transparent;
+    }
+
+    table {
+      border-collapse: separate;
+      border-spacing: 0;
+    }
+
+    th {
+      background: rgba(248, 250, 252, 0.82);
+      color: #64748b;
+      letter-spacing: 0.04em;
+    }
+
+    td {
+      background: rgba(255, 255, 255, 0.5);
+    }
+
+    tr:hover td {
+      background: rgba(240, 253, 250, 0.52);
+    }
+
+    .hint {
+      background: rgba(255, 251, 235, 0.74);
+    }
+
+    @media (max-width: 1024px) {
+      .layout {
+        padding: 10px;
+      }
+      .system-sidebar,
+      .page {
+        border-radius: 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside class="system-sidebar" aria-label="O2On 系统侧边栏">
+      <div class="system-logo">
+        <div class="system-logo-mark">O2</div>
+        <div class="system-logo-text">
+          <strong>O2On</strong>
+          <span>商品治理系统</span>
+        </div>
+      </div>
+      <nav class="side-nav">
+        <p class="side-section-title">审核中心</p>
+        <a class="side-link" id="sideWorkbenchLink" href="index.html">对码审核</a>
+        <a class="side-link is-active" href="history.html">匹配历史</a>
+      </nav>
+      <div class="side-footer">
+        当前模块：匹配历史<br />
+        支持筛选、分状态查看与导出
+      </div>
+    </aside>
+
+    <div class="page">
+    <div class="head">
+      <h1>匹配历史</h1>
+      <a class="back" id="backLink" href="index.html">返回工作台</a>
+    </div>
+
+    <div class="card" id="historyCard" data-tab="pending">
+      <div class="tabs" id="tabs">
+        <button type="button" class="tab is-active" data-tab="pending">待匹配</button>
+        <button type="button" class="tab" data-tab="matched">匹配成功</button>
+        <button type="button" class="tab" data-tab="new_drug">待新建 DrugID</button>
+      </div>
+
+      <div class="filter">
+        <div class="filter-grid">
+          <div class="field">
+            <label for="fName">商品名称</label>
+            <input type="text" id="fName" placeholder="支持模糊包含" />
+          </div>
+          <div class="field">
+            <label for="fUpc">UPC / 美团条形码</label>
+            <input type="text" id="fUpc" placeholder="支持模糊包含" />
+          </div>
+          <div class="field filter-drugid">
+            <label for="fDrugId">匹配成功的 DrugID</label>
+            <input type="text" id="fDrugId" placeholder="支持模糊包含" />
+          </div>
+          <div class="field filter-time">
+            <label for="fTimeStart">匹配时间起</label>
+            <input type="datetime-local" id="fTimeStart" />
+          </div>
+          <div class="field filter-time">
+            <label for="fTimeEnd">匹配时间止</label>
+            <input type="datetime-local" id="fTimeEnd" />
+          </div>
+          <div class="filter-actions">
+            <button type="button" class="btn btn-primary" id="btnQuery">查询</button>
+            <button type="button" class="btn" id="btnReset">重置</button>
+            <button type="button" class="btn btn-export" id="btnExport">导出</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="list-wrap" id="listWrap"></div>
+      <div class="pagination" id="pagination"></div>
+    </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var VERSION = String(window.APP_ASSET_VERSION || '10.0.1');
+      (function injectFont() {
+        var href =
+          'https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&display=swap&v=' +
+          encodeURIComponent(VERSION);
+        var l = document.createElement('link');
+        l.rel = 'stylesheet';
+        l.href = href;
+        document.head.appendChild(l);
+      })();
+
+      var STORAGE_KEY = 'meituan_drug_match_workbench_v2';
+
+      var activeTab = 'pending';
+      var currentRows = [];
+      var currentPage = 1;
+      var pageSize = 10;
+
+      function loadState() {
+        try {
+          var raw = localStorage.getItem(STORAGE_KEY);
+          if (!raw) return null;
+          return JSON.parse(raw);
+        } catch (e) {
+          return null;
+        }
+      }
+
+      function escapeHtml(s) {
+        return String(s)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;');
+      }
+
+      function fmtTime(iso) {
+        if (!iso) return '—';
+        try {
+          var d = new Date(iso);
+          if (isNaN(d.getTime())) return '—';
+          return d.toLocaleString('zh-CN', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+          });
+        } catch (e) {
+          return '—';
+        }
+      }
+
+      function parseLocalDt(val) {
+        if (!val) return null;
+        var d = new Date(val);
+        return isNaN(d.getTime()) ? null : d.getTime();
+      }
+
+      function getFilters() {
+        var useDrugId = activeTab === 'matched';
+        var useTime = activeTab === 'matched' || activeTab === 'new_drug';
+        return {
+          name: (document.getElementById('fName').value || '').trim().toLowerCase(),
+          upc: (document.getElementById('fUpc').value || '').trim().toLowerCase(),
+          drugId: useDrugId ? (document.getElementById('fDrugId').value || '').trim().toLowerCase() : '',
+          t0: useTime ? parseLocalDt(document.getElementById('fTimeStart').value) : null,
+          t1: useTime ? parseLocalDt(document.getElementById('fTimeEnd').value) : null
+        };
+      }
+
+      function inTimeRange(iso, f) {
+        if (f.t0 == null && f.t1 == null) return true;
+        /* 待匹配任务无匹配时间：不参与时间筛选，避免被误筛空 */
+        if (!iso) return true;
+        var t = new Date(iso).getTime();
+        if (isNaN(t)) return true;
+        if (f.t0 != null && t < f.t0) return false;
+        if (f.t1 != null && t > f.t1) return false;
+        return true;
+      }
+
+      function filterTasks(tasks, f) {
+        return tasks.filter(function (task) {
+          var name = String((task.meituan && task.meituan.name) || '').toLowerCase();
+          if (f.name && name.indexOf(f.name) === -1) return false;
+          var upc = String((task.meituan && task.meituan.barcode) || '').toLowerCase();
+          if (f.upc && upc.indexOf(f.upc) === -1) return false;
+          var mid = String(task.matchedDrugId || '').toLowerCase();
+          if (f.drugId && mid.indexOf(f.drugId) === -1) return false;
+          if (!inTimeRange(task.resolvedAt, f)) return false;
+          return true;
+        });
+      }
+
+      function renderTable(rows, columns) {
+        if (!rows.length) {
+          return '<div class="empty">暂无数据</div>';
+        }
+        var th = columns
+          .map(function (c) {
+            return '<th>' + escapeHtml(c.label) + '</th>';
+          })
+          .join('');
+        var tr = rows
+          .map(function (row) {
+            var tds = columns
+              .map(function (c) {
+                var v = typeof c.value === 'function' ? c.value(row) : row[c.key];
+                return '<td class="' + (c.mono ? 'mono' : '') + '">' + v + '</td>';
+              })
+              .join('');
+            return '<tr>' + tds + '</tr>';
+          })
+          .join('');
+        return '<table><thead><tr>' + th + '</tr></thead><tbody>' + tr + '</tbody></table>';
+      }
+
+      function renderPagination(total) {
+        var el = document.getElementById('pagination');
+        if (!el) return;
+        var totalPages = Math.max(1, Math.ceil(total / pageSize));
+        if (currentPage > totalPages) currentPage = totalPages;
+        var html = '<span>共 ' + total + ' 条</span>';
+        html +=
+          '<button type="button" class="page-btn" data-page="' +
+          Math.max(1, currentPage - 1) +
+          '"' +
+          (currentPage === 1 ? ' disabled' : '') +
+          '>上一页</button>';
+        var start = Math.max(1, currentPage - 2);
+        var end = Math.min(totalPages, start + 4);
+        start = Math.max(1, end - 4);
+        for (var i = start; i <= end; i++) {
+          html +=
+            '<button type="button" class="page-btn' +
+            (i === currentPage ? ' is-active' : '') +
+            '" data-page="' +
+            i +
+            '">' +
+            i +
+            '</button>';
+        }
+        html +=
+          '<button type="button" class="page-btn" data-page="' +
+          Math.min(totalPages, currentPage + 1) +
+          '"' +
+          (currentPage === totalPages ? ' disabled' : '') +
+          '>下一页</button>';
+        el.innerHTML = html;
+      }
+
+      function productColumns() {
+        var columns = [
+          { label: '商品名称', value: function (r) { return escapeHtml((r.meituan && r.meituan.name) || '—'); } },
+          { label: '商品规格', value: function (r) { return escapeHtml((r.meituan && r.meituan.spec) || '—'); } },
+          { label: '商品条码', value: function (r) { return escapeHtml((r.meituan && r.meituan.barcode) || '—'); }, mono: true },
+          { label: '批准文号', value: function (r) { return escapeHtml((r.meituan && r.meituan.approvalNo) || '—'); }, mono: true },
+          { label: '处方分类', value: function (r) { return escapeHtml((r.meituan && r.meituan.rxCategory) || '—'); } },
+          { label: '生产厂家', value: function (r) { return escapeHtml((r.meituan && r.meituan.manufacturer) || '—'); } }
+        ];
+        if (activeTab === 'matched') {
+          columns.push(
+            { label: '匹配成功的 DrugID', value: function (r) { return escapeHtml(r.matchedDrugId || '—'); }, mono: true },
+            { label: '匹配时间', value: function (r) { return escapeHtml(fmtTime(r.resolvedAt)); } }
+          );
+        } else if (activeTab === 'new_drug') {
+          columns.push({ label: '匹配时间', value: function (r) { return escapeHtml(fmtTime(r.resolvedAt)); } });
+        }
+        return columns;
+      }
+
+      function getTabRows(tasks) {
+        if (activeTab === 'pending') {
+          return tasks.filter(function (t) { return t.status === 'pending'; });
+        }
+        if (activeTab === 'matched') {
+          return tasks.filter(function (t) { return t.status === 'matched'; });
+        }
+        return tasks.filter(function (t) { return t.status === 'new_drug'; });
+      }
+
+      function render() {
+        var st = loadState();
+        var tasks = (st && st.tasks) || [];
+        var f = getFilters();
+        var filtered = filterTasks(getTabRows(tasks), f);
+        currentRows = filtered;
+        var totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+        if (currentPage > totalPages) currentPage = totalPages;
+        var start = (currentPage - 1) * pageSize;
+        var pageRows = filtered.slice(start, start + pageSize);
+
+        var wrap = document.getElementById('listWrap');
+        wrap.innerHTML = renderTable(pageRows, productColumns());
+        renderPagination(filtered.length);
+      }
+
+      function csvCell(val) {
+        var s = String(val == null ? '' : val);
+        if (/[",\n\r]/.test(s)) {
+          return '"' + s.replace(/"/g, '""') + '"';
+        }
+        return s;
+      }
+
+      function statusText(status) {
+        if (status === 'matched') return '匹配成功';
+        if (status === 'new_drug') return '待新建 DrugID';
+        return '待匹配';
+      }
+
+      function exportCurrentRows() {
+        var rows = currentRows.slice();
+        if (!rows.length) {
+          alert('当前筛选结果为空，暂无可导出数据');
+          return;
+        }
+        var headers = [
+          '商品名称',
+          '商品规格',
+          '商品条码',
+          '批准文号',
+          '处方分类',
+          '生产厂家',
+          '当前状态',
+          '匹配成功的DrugID',
+          '匹配时间'
+        ];
+        var lines = [headers.map(csvCell).join(',')];
+        rows.forEach(function (r) {
+          var m = r.meituan || {};
+          lines.push(
+            [
+              m.name || '',
+              m.spec || '',
+              m.barcode || '',
+              m.approvalNo || '',
+              m.rxCategory || '',
+              m.manufacturer || '',
+              statusText(r.status),
+              r.matchedDrugId || '',
+              fmtTime(r.resolvedAt)
+            ].map(csvCell).join(',')
+          );
+        });
+        var blob = new Blob(['\ufeff' + lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = '匹配历史_' + activeTab + '_' + new Date().toISOString().slice(0, 10) + '.csv';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+
+      function setTab(tab) {
+        activeTab = tab;
+        currentPage = 1;
+        var card = document.getElementById('historyCard');
+        if (card) card.setAttribute('data-tab', tab);
+        var tabs = document.querySelectorAll('.tab');
+        for (var i = 0; i < tabs.length; i++) {
+          tabs[i].classList.toggle('is-active', tabs[i].getAttribute('data-tab') === tab);
+        }
+        render();
+      }
+
+      document.getElementById('tabs').addEventListener('click', function (e) {
+        var t = e.target.closest('.tab');
+        if (!t) return;
+        setTab(t.getAttribute('data-tab'));
+      });
+
+      document.getElementById('pagination').addEventListener('click', function (e) {
+        var btn = e.target.closest('.page-btn');
+        if (!btn || btn.disabled) return;
+        currentPage = Number(btn.getAttribute('data-page')) || 1;
+        render();
+      });
+
+      document.getElementById('btnQuery').addEventListener('click', function () {
+        currentPage = 1;
+        render();
+      });
+      document.getElementById('btnReset').addEventListener('click', function () {
+        document.getElementById('fName').value = '';
+        document.getElementById('fUpc').value = '';
+        document.getElementById('fDrugId').value = '';
+        document.getElementById('fTimeStart').value = '';
+        document.getElementById('fTimeEnd').value = '';
+        currentPage = 1;
+        render();
+      });
+      document.getElementById('btnExport').addEventListener('click', exportCurrentRows);
+
+      var back = 'index.html?v=' + encodeURIComponent(VERSION);
+      document.getElementById('backLink').setAttribute('href', back);
+      document.getElementById('sideWorkbenchLink').setAttribute('href', back);
+
+      setTab('pending');
+    })();
+  </script>
+</body>
+</html>

@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>美团商品 ↔ DrugID 对码工作台</title>
-  <!-- 发版时修改 window.APP_ASSET_VERSION，静态地址请拼接 ?v=版本号 -->
   <script>
     window.APP_ASSET_VERSION = '10.0.1';
   </script>
@@ -12,43 +11,163 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <style>
     :root {
-      --bg: #f4f6f9;
-      --panel: #ffffff;
-      --border: #e2e8f0;
-      --text: #0f172a;
-      --muted: #64748b;
+      --bg: #d8e6ee;
+      --panel: #f8fbfd;
+      --border: rgba(203, 213, 225, 0.72);
+      --text: #182230;
+      --muted: #7a8797;
       --meituan: #ffc300;
-      --meituan-dark: #e6a800;
-      --drug: #0d9488;
-      --drug-soft: #ccfbf1;
+      --drug: #11a69a;
+      --drug-soft: #d8fbf5;
+      --accent: #0088FF;
+      --accent-soft: #dbeafe;
       --danger: #dc2626;
-      --shadow: 0 10px 40px rgba(15, 23, 42, 0.08);
-      --radius: 14px;
+      --shadow: 0 26px 80px rgba(32, 52, 68, 0.16);
+      --radius: 28px;
       --bookmark-w: 168px;
       --tab-out: 10px;
       --font: 'Noto Sans SC', 'DM Sans', system-ui, sans-serif;
     }
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     html, body {
       height: 100%;
       margin: 0;
       font-family: var(--font);
-      background: var(--bg);
+      background:
+        radial-gradient(circle at 18% 12%, rgba(255, 255, 255, 0.9) 0, rgba(255, 255, 255, 0) 26%),
+        radial-gradient(circle at 84% 8%, rgba(0, 136, 255, 0.22) 0, rgba(0, 136, 255, 0) 20%),
+        linear-gradient(135deg, #a9bfcb 0%, #d8e6ee 46%, #eef5f8 100%);
       color: var(--text);
     }
 
+    .layout {
+      display: flex;
+      min-height: 100vh;
+      width: 100%;
+      gap: 18px;
+      padding: 18px;
+    }
+
+    .system-sidebar {
+      flex: 0 0 220px;
+      background: rgba(248, 251, 253, 0.86);
+      color: #334155;
+      padding: 18px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      border: 1px solid rgba(255, 255, 255, 0.72);
+      border-radius: 30px;
+      box-shadow: 0 24px 70px rgba(32, 52, 68, 0.16);
+      backdrop-filter: blur(18px);
+      position: relative;
+      z-index: 80;
+    }
+
+    .system-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 4px 6px 14px;
+      border-bottom: 1px solid rgba(51, 65, 85, 0.08);
+    }
+
+    .system-logo-mark {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, #0088FF, #33A0FF);
+      color: #fff;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+      box-shadow: 0 12px 26px rgba(0, 136, 255, 0.24);
+    }
+
+    .system-logo-text {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.25;
+    }
+
+    .system-logo-text strong {
+      color: #182230;
+      font-size: 0.96rem;
+    }
+
+    .system-logo-text span {
+      font-size: 0.72rem;
+      color: var(--muted);
+    }
+
+    .side-section-title {
+      margin: 0 8px 8px;
+      color: #64748b;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+    }
+
+    .side-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .side-link {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      color: #334155;
+      text-decoration: none;
+      font-size: 0.86rem;
+      font-weight: 600;
+      border: 1px solid transparent;
+    }
+
+    .side-link:hover {
+      background: rgba(255, 255, 255, 0.78);
+      border-color: rgba(255, 255, 255, 0.82);
+      color: #182230;
+    }
+
+    .side-link.is-active {
+      background: linear-gradient(135deg, #0088FF, #006FD6);
+      color: #fff;
+      box-shadow: 0 14px 30px rgba(0, 136, 255, 0.24);
+    }
+
+    .side-footer {
+      margin-top: auto;
+      padding: 12px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.62);
+      border: 1px solid rgba(255, 255, 255, 0.72);
+      font-size: 0.72rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
     .app {
+      flex: 1;
+      min-width: 0;
       display: flex;
       flex-direction: column;
       min-height: 100%;
-      max-width: 1680px;
+      max-width: none;
       margin: 0 auto;
-      padding: 16px 16px 16px 20px;
+      padding: 18px;
       gap: 12px;
+      border-radius: 34px;
+      background: rgba(248, 251, 253, 0.78);
+      border: 1px solid rgba(255, 255, 255, 0.76);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
     }
 
     .topbar {
@@ -56,7 +175,7 @@
       align-items: center;
       justify-content: space-between;
       flex-wrap: wrap;
-      gap: 8px;
+      gap: 10px;
     }
 
     .topbar h1 {
@@ -64,6 +183,13 @@
       font-weight: 700;
       margin: 0;
       letter-spacing: 0.02em;
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
     }
 
     .badge {
@@ -74,6 +200,88 @@
       background: var(--panel);
       border: 1px solid var(--border);
       color: var(--muted);
+    }
+
+    .link-history {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--drug);
+      text-decoration: none;
+      padding: 6px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--drug-soft);
+      background: var(--drug-soft);
+    }
+
+    .link-history:hover {
+      background: #99f6e4;
+    }
+
+    .progress-wrap {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      box-shadow: var(--shadow);
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .progress-main {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .progress-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .progress-meta strong {
+      color: var(--text);
+    }
+
+    .progress-track {
+      height: 10px;
+      border-radius: 999px;
+      background: #e2e8f0;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--drug), #2dd4bf);
+      transition: width 0.35s ease;
+    }
+
+    .action-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      justify-content: flex-end;
+    }
+
+    .btn-lg {
+      font-size: 0.82rem;
+      padding: 9px 16px;
+      border-radius: 10px;
+    }
+
+    .btn-warn {
+      background: #fff7ed;
+      border: 1px solid #fed7aa;
+      color: #c2410c;
+    }
+
+    .btn-warn:hover:not(:disabled) {
+      background: #ffedd5;
     }
 
     .main {
@@ -91,7 +299,6 @@
       isolation: isolate;
     }
 
-    /* 左侧美团 */
     .col-meituan {
       flex: 0 0 38%;
       min-width: 280px;
@@ -149,16 +356,13 @@
       padding: 10px 12px;
     }
 
-    .meta-card.full {
-      grid-column: 1 / -1;
-    }
+    .meta-card.full { grid-column: 1 / -1; }
 
     .meta-label {
       font-size: 0.68rem;
       font-weight: 600;
       color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
+      letter-spacing: 0.04em;
       margin-bottom: 4px;
     }
 
@@ -183,7 +387,6 @@
       background: #f1f5f9;
     }
 
-    /* 中间 Drug 展示区 */
     .col-drugs {
       flex: 1;
       min-width: 0;
@@ -198,10 +401,20 @@
     .drug-head {
       padding: 12px 16px;
       border-bottom: 1px solid var(--border);
+      background: var(--panel);
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .drug-head-row {
       display: flex;
       align-items: center;
       gap: 8px;
-      background: var(--panel);
+      flex-wrap: wrap;
+      min-width: 0;
     }
 
     .pill-drug {
@@ -222,7 +435,6 @@
       overflow: auto;
     }
 
-    /* 1～3 分区：横向等分 */
     .drug-grid[data-slots='1'],
     .drug-grid[data-slots='2'],
     .drug-grid[data-slots='3'] {
@@ -230,7 +442,6 @@
       flex-direction: row;
     }
 
-    /* 4 分区：田字格（2×2） */
     .drug-grid[data-slots='4'] {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -255,6 +466,11 @@
       box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
     }
 
+    .drug-slot.is-picked {
+      border-color: var(--drug);
+      box-shadow: 0 0 0 2px rgba(13, 148, 136, 0.25);
+    }
+
     .drug-slot-inner {
       padding: 12px;
       overflow: auto;
@@ -264,32 +480,41 @@
       gap: 10px;
     }
 
-    /* 分区数量驱动图片尺寸 */
-    .drug-grid[data-slots='1'] .gallery-drug {
-      grid-template-columns: repeat(3, 1fr);
+    .pick-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      background: #f0fdfa;
+      border: 1px solid #99f6e4;
+      border-radius: 8px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #0f766e;
+      cursor: pointer;
+      user-select: none;
     }
 
+    .pick-row input {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--drug);
+      cursor: pointer;
+    }
+
+    .drug-grid[data-slots='1'] .gallery-drug { grid-template-columns: repeat(3, 1fr); }
     .drug-grid[data-slots='1'] .gallery-drug img {
       max-height: clamp(140px, 28vh, 260px);
     }
-
-    .drug-grid[data-slots='2'] .gallery-drug {
-      grid-template-columns: repeat(3, 1fr);
-    }
-
+    .drug-grid[data-slots='2'] .gallery-drug { grid-template-columns: repeat(3, 1fr); }
     .drug-grid[data-slots='2'] .gallery-drug img {
       max-height: clamp(100px, 18vh, 180px);
     }
-
     .drug-grid[data-slots='3'] .gallery-drug,
-    .drug-grid[data-slots='4'] .gallery-drug {
-      grid-template-columns: repeat(3, 1fr);
-    }
-
+    .drug-grid[data-slots='4'] .gallery-drug { grid-template-columns: repeat(3, 1fr); }
     .drug-grid[data-slots='3'] .gallery-drug img {
       max-height: clamp(72px, 12vh, 120px);
     }
-
     .drug-grid[data-slots='4'] .gallery-drug img {
       max-height: clamp(56px, 10vh, 96px);
     }
@@ -313,6 +538,60 @@
       font-weight: 700;
       line-height: 1.3;
       margin: 0;
+    }
+
+    .drug-identity {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      min-width: 0;
+    }
+
+    .drug-name-inline {
+      font-size: clamp(0.8rem, 1.1vw, 0.98rem);
+      font-weight: 800;
+      color: var(--text);
+      line-height: 1.3;
+    }
+
+    .drug-name-inline .drug-code {
+      color: #0f172a;
+      font-weight: 800;
+      margin-right: 4px;
+    }
+
+    .confidence-tag {
+      flex: 0 0 auto;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 56px;
+      height: 24px;
+      padding: 0 10px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 800;
+      border: 1px solid transparent;
+      white-space: nowrap;
+    }
+
+    .confidence-high {
+      color: #0088FF;
+      background: #dff1ff;
+      border-color: rgba(0, 136, 255, 0.18);
+    }
+
+    .confidence-mid {
+      color: #059669;
+      background: #dcfce7;
+      border-color: rgba(5, 150, 105, 0.2);
+    }
+
+    .confidence-low {
+      color: #64748b;
+      background: #eef2f7;
+      border-color: rgba(100, 116, 139, 0.18);
     }
 
     .meta-grid-drug {
@@ -340,7 +619,6 @@
       margin-bottom: 2px;
     }
 
-    /* 右侧书签栏（叠在最上层，避免被中间商品卡片压住） */
     .col-bookmarks {
       flex: 0 0 var(--bookmark-w);
       border-left: 1px solid var(--border);
@@ -414,6 +692,39 @@
       overflow: hidden;
     }
 
+    .bm-identity {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+
+    .bm-title {
+      min-width: 0;
+      font-size: 0.74rem;
+      font-weight: 800;
+      line-height: 1.35;
+      color: var(--text);
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .bm-title .drug-code {
+      color: #0f766e;
+      font-weight: 800;
+      margin-right: 2px;
+    }
+
+    .bm-identity .confidence-tag {
+      min-width: 44px;
+      height: 20px;
+      padding: 0 7px;
+      font-size: 0.62rem;
+    }
+
     .bm-actions {
       display: flex;
       flex-direction: column;
@@ -431,18 +742,14 @@
       transition: background 0.15s, border-color 0.15s, transform 0.1s;
     }
 
-    .btn:active {
-      transform: scale(0.98);
-    }
+    .btn:active { transform: scale(0.98); }
 
     .btn-primary {
       background: var(--drug);
       color: #fff;
     }
 
-    .btn-primary:hover {
-      background: #0f766e;
-    }
+    .btn-primary:hover { background: #0f766e; }
 
     .btn-primary:disabled {
       opacity: 0.45;
@@ -455,15 +762,7 @@
       color: var(--text);
     }
 
-    .btn-secondary:hover {
-      background: #f8fafc;
-    }
-
-    .btn-ghost {
-      background: transparent;
-      border-color: var(--border);
-      color: var(--muted);
-    }
+    .btn-secondary:hover { background: #f8fafc; }
 
     .btn-danger {
       background: #fef2f2;
@@ -471,9 +770,7 @@
       color: var(--danger);
     }
 
-    .btn-danger:hover {
-      background: #fee2e2;
-    }
+    .btn-danger:hover { background: #fee2e2; }
 
     .toast {
       position: fixed;
@@ -488,7 +785,7 @@
       box-shadow: var(--shadow);
       opacity: 0;
       transition: transform 0.25s ease, opacity 0.25s ease;
-      z-index: 100;
+      z-index: 200;
       pointer-events: none;
     }
 
@@ -497,10 +794,58 @@
       opacity: 1;
     }
 
+    .done-screen {
+      display: none;
+      flex: 1;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      padding: 48px 24px;
+      text-align: center;
+      background: linear-gradient(180deg, #f0fdfa 0%, var(--panel) 50%);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+    }
+
+    .done-screen.show { display: flex; }
+
+    .done-screen h2 {
+      margin: 0 0 12px;
+      font-size: 1.35rem;
+      color: var(--drug);
+    }
+
+    .done-screen p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .workbench.hide { display: none; }
+
     @media (max-width: 1024px) {
-      .main {
+      .layout {
         flex-direction: column;
       }
+      .system-sidebar {
+        flex: none;
+        padding: 10px 12px;
+      }
+      .system-logo {
+        padding-bottom: 8px;
+      }
+      .side-nav {
+        flex-direction: row;
+        overflow-x: auto;
+      }
+      .side-link {
+        white-space: nowrap;
+      }
+      .side-footer {
+        display: none;
+      }
+      .main { flex-direction: column; }
       .col-meituan {
         flex: none;
         border-right: none;
@@ -529,27 +874,363 @@
         margin-top: -6px;
       }
     }
+    /* High fidelity UI skin: inspired by soft bento SaaS landing pages */
+    body {
+      background:
+        radial-gradient(circle at 12% 8%, rgba(255, 255, 255, 0.75) 0, transparent 28%),
+        radial-gradient(circle at 82% 16%, rgba(124, 92, 255, 0.18) 0, transparent 24%),
+        linear-gradient(135deg, #a9bfca 0%, #dbe7ed 46%, #f4f7f8 100%);
+    }
+
+    .layout {
+      gap: 18px;
+      padding: 18px;
+    }
+
+    .system-sidebar {
+      flex-basis: 232px;
+      border-radius: 30px;
+      background: rgba(247, 250, 252, 0.78);
+      color: #334155;
+      border: 1px solid rgba(255, 255, 255, 0.78);
+      box-shadow: 0 24px 70px rgba(29, 47, 64, 0.16);
+      backdrop-filter: blur(18px);
+    }
+
+    .system-logo {
+      border-bottom-color: rgba(51, 65, 85, 0.08);
+    }
+
+    .system-logo-mark {
+      background: linear-gradient(135deg, #0088FF, #33A0FF);
+      box-shadow: 0 12px 26px rgba(0, 136, 255, 0.24);
+    }
+
+    .system-logo-text strong {
+      color: #182230;
+    }
+
+    .system-logo-text span,
+    .side-section-title,
+    .side-footer {
+      color: #7a8797;
+    }
+
+    .side-link {
+      color: #334155;
+      border: 1px solid transparent;
+    }
+
+    .side-link:hover {
+      color: #1d2530;
+      background: rgba(255, 255, 255, 0.72);
+      border-color: rgba(255, 255, 255, 0.82);
+    }
+
+    .side-link.is-active {
+      color: #fff;
+      background: linear-gradient(135deg, #0088FF, #006FD6);
+      box-shadow: 0 14px 30px rgba(0, 136, 255, 0.24);
+    }
+
+    .side-footer {
+      background: rgba(255, 255, 255, 0.58);
+      border-color: rgba(255, 255, 255, 0.72);
+    }
+
+    .app {
+      border-radius: 34px;
+      padding: 18px;
+      background: rgba(248, 251, 252, 0.72);
+      border: 1px solid rgba(255, 255, 255, 0.78);
+      box-shadow: 0 26px 80px rgba(29, 47, 64, 0.17);
+      backdrop-filter: blur(18px);
+    }
+
+    .topbar {
+      min-height: 56px;
+      padding: 0 8px 4px;
+    }
+
+    .topbar h1 {
+      font-size: clamp(1.35rem, 2.2vw, 2.15rem);
+      line-height: 1.05;
+      color: #1f2937;
+      letter-spacing: -0.04em;
+    }
+
+    .badge,
+    .link-history {
+      border: 1px solid rgba(255, 255, 255, 0.76);
+      background: rgba(255, 255, 255, 0.66);
+      box-shadow: 0 8px 20px rgba(29, 47, 64, 0.06);
+    }
+
+    .link-history {
+      color: #0088FF;
+    }
+
+    .progress-wrap,
+    .main,
+    .done-screen {
+      border-radius: 28px;
+      border: 1px solid rgba(255, 255, 255, 0.82);
+      background: rgba(255, 255, 255, 0.72);
+      box-shadow: 0 18px 52px rgba(29, 47, 64, 0.12);
+    }
+
+    .progress-track {
+      height: 12px;
+      background: rgba(148, 163, 184, 0.18);
+    }
+
+    .progress-fill {
+      background: linear-gradient(90deg, #0088FF, #33A0FF 52%, #22d3b6);
+      box-shadow: 0 0 18px rgba(0, 136, 255, 0.28);
+    }
+
+    .col-meituan {
+      background:
+        linear-gradient(180deg, rgba(255, 250, 229, 0.9) 0%, rgba(255, 255, 255, 0.78) 42%),
+        #fff;
+      border-radius: 28px 0 0 28px;
+    }
+
+    .col-drugs {
+      background: rgba(244, 247, 249, 0.72);
+    }
+
+    .col-bookmarks {
+      border-radius: 0 28px 28px 0;
+      background: rgba(238, 244, 247, 0.86);
+      box-shadow: -14px 0 34px rgba(29, 47, 64, 0.08);
+    }
+
+    .col-head,
+    .drug-head,
+    .bm-head {
+      background: rgba(255, 255, 255, 0.72);
+      border-bottom-color: rgba(226, 232, 240, 0.72);
+    }
+
+    .pill-meituan,
+    .pill-drug {
+      border-radius: 999px;
+      box-shadow: 0 9px 18px rgba(29, 47, 64, 0.08);
+    }
+
+    .pill-drug {
+      background: rgba(34, 211, 182, 0.16);
+      color: #0f766e;
+    }
+
+    .meta-card,
+    .meta-tiny,
+    .drug-slot,
+    .bm-card {
+      border-color: rgba(226, 232, 240, 0.78);
+      background: rgba(255, 255, 255, 0.78);
+      box-shadow: 0 10px 26px rgba(29, 47, 64, 0.07);
+    }
+
+    .drug-slot {
+      border-radius: 22px;
+    }
+
+    .drug-slot.is-picked {
+      border-color: rgba(0, 136, 255, 0.68);
+      box-shadow: 0 0 0 3px rgba(0, 136, 255, 0.14), 0 18px 44px rgba(0, 136, 255, 0.14);
+    }
+
+    .product-title,
+    .drug-title {
+      letter-spacing: -0.02em;
+    }
+
+    .gallery img,
+    .gallery-drug img {
+      border-radius: 18px;
+      box-shadow: 0 10px 24px rgba(29, 47, 64, 0.12);
+    }
+
+    .pick-row {
+      border-radius: 999px;
+      color: #006FD6;
+      background: rgba(0, 136, 255, 0.1);
+      border-color: rgba(0, 136, 255, 0.22);
+    }
+
+    .pick-row input {
+      accent-color: #0088FF;
+    }
+
+    .btn {
+      border-radius: 999px;
+      box-shadow: 0 8px 18px rgba(29, 47, 64, 0.08);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #0088FF, #006FD6);
+      box-shadow: 0 12px 24px rgba(0, 136, 255, 0.22);
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #0078E6, #0062C2);
+    }
+
+    .btn-warn {
+      background: rgba(255, 247, 237, 0.86);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.74);
+    }
+
+    .btn-danger {
+      background: rgba(254, 242, 242, 0.86);
+    }
+
+    .bm-card.is-visible {
+      border-color: rgba(0, 136, 255, 0.52);
+      box-shadow: 0 14px 30px rgba(0, 136, 255, 0.16);
+    }
+
+    @media (max-width: 1024px) {
+      .layout {
+        padding: 10px;
+      }
+      .system-sidebar,
+      .app {
+        border-radius: 24px;
+      }
+    }
+
+    /* 书签置顶修正：当前展示卡片需要完整压在 Drug 分栏之上，不能被列表容器裁切 */
+    .col-bookmarks {
+      z-index: 300;
+      overflow: visible;
+      isolation: isolate;
+    }
+
+    .bm-list {
+      overflow: visible;
+      padding-left: var(--tab-out);
+      margin-left: calc(-1 * var(--tab-out));
+      width: calc(100% + var(--tab-out));
+    }
+
+    .bm-card {
+      border-left: 1px solid rgba(226, 232, 240, 0.78);
+      border-radius: 18px;
+      transform: translateX(0);
+      will-change: transform;
+    }
+
+    .bm-card.is-visible {
+      z-index: 999;
+      margin-left: 0;
+      border-left: 1px solid rgba(0, 136, 255, 0.52);
+      border-radius: 18px;
+      transform: translateX(calc(-1 * var(--tab-out)));
+    }
+
+    /* 顶部操作区：进度条右侧放历史，Drug 标题与操作按钮同一行 */
+    .progress-wrap .link-history {
+      flex: 0 0 auto;
+      white-space: nowrap;
+      padding: 8px 16px;
+      color: #0088FF;
+      background: rgba(255, 255, 255, 0.78);
+    }
+
+    .drug-head {
+      min-height: 54px;
+      padding-top: 9px;
+      padding-bottom: 9px;
+    }
+
+    .drug-head .action-bar {
+      flex: 0 0 auto;
+      flex-wrap: nowrap;
+      margin-left: auto;
+    }
+
+    .drug-head .btn-lg {
+      white-space: nowrap;
+      padding: 8px 14px;
+    }
+
+    @media (max-width: 1180px) {
+      .drug-head {
+        flex-wrap: wrap;
+      }
+      .drug-head .action-bar {
+        width: 100%;
+        justify-content: flex-start;
+        margin-left: 0;
+      }
+    }
   </style>
 </head>
 <body>
-  <div class="app">
-    <div class="topbar">
-      <h1>美团商品 ↔ DrugID 对码工作台 <span class="badge">纯前端 Demo · 进度已本地保存</span></h1>
-      <span class="badge" id="versionLabel"></span>
-    </div>
-    <div class="main" id="main">
-      <section class="col-meituan" id="meituanCol"></section>
-      <section class="col-drugs">
-        <div class="drug-head">
-          <span class="pill-drug">待匹配 DrugID</span>
-          <span style="font-size:0.8rem;color:var(--muted)">最多 4 区对比；满 4 区为田字格 · 最右书签控制展示</span>
+  <div class="layout">
+    <aside class="system-sidebar" aria-label="O2On 系统侧边栏">
+      <div class="system-logo">
+        <div class="system-logo-mark">O2</div>
+        <div class="system-logo-text">
+          <strong>O2On</strong>
+          <span>商品治理系统</span>
         </div>
-        <div class="drug-grid" id="drugGrid" data-slots="1"></div>
-      </section>
-      <aside class="col-bookmarks">
-        <div class="bm-head">DrugID 书签</div>
-        <div class="bm-list" id="bookmarkList"></div>
-      </aside>
+      </div>
+      <nav class="side-nav">
+        <p class="side-section-title">审核中心</p>
+        <a class="side-link is-active" href="index.html">对码审核</a>
+        <a class="side-link" id="sideHistoryLink" href="history.html">匹配历史</a>
+      </nav>
+      <div class="side-footer">
+        当前模块：对码审核<br />
+        支持本地进度保存与历史查询
+      </div>
+    </aside>
+    <div class="app">
+    <div class="progress-wrap" id="progressWrap">
+      <div class="progress-main">
+        <div class="progress-meta">
+          <span>待匹配进度：<strong id="progressText">—</strong></span>
+          <span id="progressFraction">—</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+        </div>
+      </div>
+      <a class="link-history" id="historyLink" href="history.html">匹配历史</a>
+    </div>
+
+    <div class="workbench" id="workbench">
+      <div class="main" id="main">
+        <section class="col-meituan" id="meituanCol"></section>
+        <section class="col-drugs">
+          <div class="drug-head">
+            <div class="drug-head-row">
+              <span class="pill-drug">待匹配 DrugID</span>
+            </div>
+            <div class="action-bar">
+              <button type="button" class="btn btn-primary btn-lg" id="btnMatchOk" disabled>匹配成功，下一条</button>
+              <button type="button" class="btn btn-warn btn-lg" id="btnNewDrug">需新建 DrugID，下一条</button>
+            </div>
+          </div>
+          <div class="drug-grid" id="drugGrid" data-slots="1"></div>
+        </section>
+        <aside class="col-bookmarks">
+          <div class="bm-list" id="bookmarkList"></div>
+        </aside>
+      </div>
+    </div>
+
+    <div class="done-screen" id="doneScreen">
+      <h2>您已完成所有审核匹配任务，辛苦了</h2>
+      <p>可前往 <a href="history.html" id="historyLink2">匹配历史</a> 查看记录。</p>
+    </div>
     </div>
   </div>
   <div class="toast" id="toast" role="status"></div>
@@ -566,138 +1247,188 @@
         l.href = href;
         document.head.appendChild(l);
       })();
-      /** 进度与资源版本解耦：改 APP_ASSET_VERSION 只影响静态资源缓存，不会清空已对码展示状态 */
-      var STORAGE_KEY = 'meituan_drug_match_demo_state';
 
-      /** 演示数据：左侧唯一美团商品；右侧多条 DrugID 候选 */
-      var MEITUAN_PRODUCT = {
-        id: 'mt-001',
-        name: '阿莫西林胶囊 0.25g*24粒/盒',
-        spec: '0.25g*24粒',
-        barcode: '6921168509926',
-        approvalNo: '国药准字H11030263',
-        manufacturer: '某某制药有限公司',
-        rxCategory: '处方',
-        images: [
-          'https://picsum.photos/seed/mt-a1/600/600?v=' + VERSION,
-          'https://picsum.photos/seed/mt-a2/600/600?v=' + VERSION,
-          'https://picsum.photos/seed/mt-a3/600/600?v=' + VERSION,
-          'https://picsum.photos/seed/mt-a4/600/600?v=' + VERSION,
-          'https://picsum.photos/seed/mt-a5/600/600?v=' + VERSION,
-          'https://picsum.photos/seed/mt-a6/600/600?v=' + VERSION
-        ]
-      };
+      var STORAGE_KEY = 'meituan_drug_match_workbench_v2';
+      var LEGACY_KEY = 'meituan_drug_match_demo_state';
 
-      var DRUG_CANDIDATES = [
-        {
-          id: 'drug-a',
-          drugId: 'DRUG-10086001',
-          name: '阿莫西林胶囊',
-          spec: '0.25g×24粒',
-          barcode: '6930000000001',
-          approvalNo: '国药准字H13020189',
-          manufacturer: '华北某制药厂',
-          rxCategory: '处方',
-          images: [
-            'https://picsum.photos/seed/da1/500/500?v=' + VERSION,
-            'https://picsum.photos/seed/da2/500/500?v=' + VERSION,
-            'https://picsum.photos/seed/da3/500/500?v=' + VERSION
-          ]
-        },
-        {
-          id: 'drug-b',
-          drugId: 'DRUG-10086002',
-          name: '阿莫西林胶囊（联邦）',
-          spec: '0.25g*24粒/盒',
-          barcode: '6930000000002',
-          approvalNo: '国药准字H44021345',
-          manufacturer: '联邦制药',
-          rxCategory: '处方',
-          images: [
-            'https://picsum.photos/seed/db1/500/500?v=' + VERSION,
-            'https://picsum.photos/seed/db2/500/500?v=' + VERSION
-          ]
-        },
-        {
-          id: 'drug-c',
-          drugId: 'DRUG-10086003',
-          name: '阿莫西林胶囊',
-          spec: '0.25g×20粒',
-          barcode: '6930000000003',
-          approvalNo: '国药准字H20040012',
-          manufacturer: '华南某药业',
-          rxCategory: '非处方',
-          images: [
-            'https://picsum.photos/seed/dc1/500/500?v=' + VERSION,
-            'https://picsum.photos/seed/dc2/500/500?v=' + VERSION,
-            'https://picsum.photos/seed/dc3/500/500?v=' + VERSION,
-            'https://picsum.photos/seed/dc4/500/500?v=' + VERSION
-          ]
-        },
-        {
-          id: 'drug-d',
-          drugId: 'DRUG-10086004',
-          name: '阿莫西林颗粒',
-          spec: '0.125g×12袋',
-          barcode: '6930000000004',
-          approvalNo: '国药准字H36021998',
-          manufacturer: '儿童专用线',
-          rxCategory: '其他',
-          images: [
-            'https://picsum.photos/seed/dd1/500/500?v=' + VERSION
-          ]
-        },
-        {
-          id: 'drug-e',
-          drugId: 'DRUG-10086005',
-          name: '阿莫西林胶囊',
-          spec: '0.5g×12粒',
-          barcode: '6930000000005',
-          approvalNo: '国药准字H51030677',
-          manufacturer: '西部某生物制药',
-          rxCategory: '处方',
-          images: [
-            'https://picsum.photos/seed/de1/500/500?v=' + VERSION,
-            'https://picsum.photos/seed/de2/500/500?v=' + VERSION,
-            'https://picsum.photos/seed/de3/500/500?v=' + VERSION,
-            'https://picsum.photos/seed/de4/500/500?v=' + VERSION,
-            'https://picsum.photos/seed/de5/500/500?v=' + VERSION,
-            'https://picsum.photos/seed/de6/500/500?v=' + VERSION
-          ]
+      function drugImages(seed, n) {
+        var arr = [];
+        for (var i = 0; i < n; i++) {
+          arr.push('https://picsum.photos/seed/' + seed + i + '/500/500?v=' + VERSION);
         }
-      ];
+        return arr;
+      }
+
+      function buildDefaultTasks() {
+        return [
+          {
+            id: 'task-1',
+            status: 'pending',
+            matchedDrugId: null,
+            matchedDrugName: null,
+            resolvedAt: null,
+            meituan: {
+              name: '阿莫西林胶囊 0.25g*24粒/盒',
+              spec: '0.25g*24粒',
+              barcode: '6921168509926',
+              approvalNo: '国药准字H11030263',
+              manufacturer: '某某制药有限公司',
+              rxCategory: '处方',
+              images: drugImages('mt1-', 6)
+            },
+            candidates: [
+              { id: 't1-c1', drugId: 'DRUG-10086001', name: '阿莫西林胶囊', confidence: 'high', spec: '0.25g×24粒', barcode: '6930000000001', approvalNo: '国药准字H13020189', manufacturer: '华北某制药厂', rxCategory: '处方', images: drugImages('t1a-', 3) },
+              { id: 't1-c2', drugId: 'DRUG-10086002', name: '阿莫西林胶囊（联邦）', confidence: 'medium', spec: '0.25g*24粒/盒', barcode: '6930000000002', approvalNo: '国药准字H44021345', manufacturer: '联邦制药', rxCategory: '处方', images: drugImages('t1b-', 2) },
+              { id: 't1-c3', drugId: 'DRUG-10086003', name: '阿莫西林胶囊', confidence: 'low', spec: '0.25g×20粒', barcode: '6930000000003', approvalNo: '国药准字H20040012', manufacturer: '华南某药业', rxCategory: '非处方', images: drugImages('t1c-', 4) },
+              { id: 't1-c4', drugId: 'DRUG-10086004', name: '阿莫西林颗粒', confidence: 'low', spec: '0.125g×12袋', barcode: '6930000000004', approvalNo: '国药准字H36021998', manufacturer: '儿童专用线', rxCategory: '其他', images: drugImages('t1d-', 1) },
+              { id: 't1-c5', drugId: 'DRUG-10086005', name: '阿莫西林胶囊', confidence: 'medium', spec: '0.5g×12粒', barcode: '6930000000005', approvalNo: '国药准字H51030677', manufacturer: '西部某生物制药', rxCategory: '处方', images: drugImages('t1e-', 6) }
+            ]
+          },
+          {
+            id: 'task-2',
+            status: 'pending',
+            matchedDrugId: null,
+            matchedDrugName: null,
+            resolvedAt: null,
+            meituan: {
+              name: '布洛芬缓释胶囊 0.3g*20粒',
+              spec: '0.3g×20粒',
+              barcode: '6901234567890',
+              approvalNo: '国药准字H10950255',
+              manufacturer: '芬必得制药',
+              rxCategory: '非处方',
+              images: drugImages('mt2-', 4)
+            },
+            candidates: [
+              { id: 't2-c1', drugId: 'DRUG-20091001', name: '布洛芬缓释胶囊', confidence: 'high', spec: '0.3g*20粒', barcode: '6931111111111', approvalNo: '国药准字H10950255', manufacturer: '芬必得制药', rxCategory: '非处方', images: drugImages('t2a-', 3) },
+              { id: 't2-c2', drugId: 'DRUG-20091002', name: '布洛芬胶囊', confidence: 'medium', spec: '0.2g*10粒', barcode: '6931111111112', approvalNo: '国药准字H20013333', manufacturer: '某药业', rxCategory: '非处方', images: drugImages('t2b-', 2) }
+            ]
+          },
+          {
+            id: 'task-3',
+            status: 'pending',
+            matchedDrugId: null,
+            matchedDrugName: null,
+            resolvedAt: null,
+            meituan: {
+              name: '维生素C片 100mg*100片',
+              spec: '100mg×100片',
+              barcode: '6970000000001',
+              approvalNo: '国药准字H44021999',
+              manufacturer: '营养保健厂',
+              rxCategory: '其他',
+              images: drugImages('mt3-', 5)
+            },
+            candidates: [
+              { id: 't3-c1', drugId: 'DRUG-30033001', name: '维生素C片', confidence: 'high', spec: '100mg*100片', barcode: '6970000000001', approvalNo: '国药准字H44021999', manufacturer: '营养保健厂', rxCategory: '其他', images: drugImages('t3a-', 4) },
+              { id: 't3-c2', drugId: 'DRUG-30033002', name: '维C咀嚼片', confidence: 'medium', spec: '50mg*60片', barcode: '6970000000002', approvalNo: '国药准字H36011888', manufacturer: '咀嚼片专厂', rxCategory: '其他', images: drugImages('t3b-', 2) },
+              { id: 't3-c3', drugId: 'DRUG-30033003', name: '维生素C泡腾片', confidence: 'low', spec: '1g*10片', barcode: '6970000000003', approvalNo: '国药准字H51022000', manufacturer: '泡腾线', rxCategory: '其他', images: drugImages('t3c-', 3) }
+            ]
+          },
+          {
+            id: 'task-4',
+            status: 'pending',
+            matchedDrugId: null,
+            matchedDrugName: null,
+            resolvedAt: null,
+            meituan: {
+              name: '氯化钠注射液 0.9% 250ml',
+              spec: '250ml:2.25g',
+              barcode: '6988888888001',
+              approvalNo: '国药准字H32020001',
+              manufacturer: '输液有限公司',
+              rxCategory: '处方',
+              images: drugImages('mt4-', 3)
+            },
+            candidates: [
+              { id: 't4-c1', drugId: 'DRUG-40044001', name: '0.9%氯化钠注射液', confidence: 'high', spec: '250ml', barcode: '6988888888001', approvalNo: '国药准字H32020001', manufacturer: '输液有限公司', rxCategory: '处方', images: drugImages('t4a-', 2) },
+              { id: 't4-c2', drugId: 'DRUG-40044002', name: '葡萄糖注射液', confidence: 'low', spec: '250ml:12.5g', barcode: '6988888888002', approvalNo: '国药准字H32020002', manufacturer: '输液有限公司', rxCategory: '处方', images: drugImages('t4b-', 1) }
+            ]
+          },
+          {
+            id: 'task-5',
+            status: 'pending',
+            matchedDrugId: null,
+            matchedDrugName: null,
+            resolvedAt: null,
+            meituan: {
+              name: '蒙脱石散 3g*10袋',
+              spec: '3g×10袋',
+              barcode: '6999999999001',
+              approvalNo: '国药准字H20000666',
+              manufacturer: '止泻药业',
+              rxCategory: '非处方',
+              images: drugImages('mt5-', 4)
+            },
+            candidates: [
+              { id: 't5-c1', drugId: 'DRUG-50055001', name: '蒙脱石散', confidence: 'high', spec: '3g*10袋', barcode: '6999999999001', approvalNo: '国药准字H20000666', manufacturer: '止泻药业', rxCategory: '非处方', images: drugImages('t5a-', 3) },
+              { id: 't5-c2', drugId: 'DRUG-50055002', name: '蒙脱石散（草莓味）', confidence: 'medium', spec: '3g*6袋', barcode: '6999999999002', approvalNo: '国药准字H20000777', manufacturer: '儿童线', rxCategory: '非处方', images: drugImages('t5b-', 2) },
+              { id: 't5-c3', drugId: 'DRUG-50055003', name: '蒙脱石混悬液', confidence: 'low', spec: '120ml', barcode: '6999999999003', approvalNo: '国药准字H20000888', manufacturer: '液体制剂', rxCategory: '处方', images: drugImages('t5c-', 2) },
+              { id: 't5-c4', drugId: 'DRUG-50055004', name: '口服补液盐散', confidence: 'low', spec: '14.75g', barcode: '6999999999004', approvalNo: '国药准字H20000999', manufacturer: '电解质厂', rxCategory: '非处方', images: drugImages('t5d-', 1) }
+            ]
+          }
+        ];
+      }
 
       var MAX_SLOTS = 4;
 
       function loadState() {
         try {
           var raw = localStorage.getItem(STORAGE_KEY);
-          if (!raw) return null;
-          return JSON.parse(raw);
-        } catch (e) {
-          return null;
-        }
+          if (raw) return JSON.parse(raw);
+        } catch (e) {}
+        try {
+          localStorage.removeItem(LEGACY_KEY);
+        } catch (e2) {}
+        return null;
       }
 
-      function saveState(state) {
+      function saveState(s) {
         try {
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
         } catch (e) {}
       }
 
       function defaultState() {
-        return { visibleDrugIds: [DRUG_CANDIDATES[0].id] };
+        return {
+          version: 2,
+          tasks: buildDefaultTasks(),
+          currentTaskIndex: 0,
+          visibleDrugIds: null,
+          selectedDrugId: null
+        };
+      }
+
+      function candidateIdsForTask(task) {
+        return (task.candidates || []).map(function (c) { return c.id; });
       }
 
       function normalizeState(s) {
         var d = defaultState();
-        if (!s || !Array.isArray(s.visibleDrugIds)) return d;
-        var ids = s.visibleDrugIds.filter(function (id) {
-          return DRUG_CANDIDATES.some(function (c) { return c.id === id; });
-        });
-        if (ids.length === 0) return d;
-        if (ids.length > MAX_SLOTS) ids = ids.slice(0, MAX_SLOTS);
-        return { visibleDrugIds: ids };
+        if (!s || s.version !== 2 || !Array.isArray(s.tasks) || s.tasks.length === 0) return d;
+        var tasks = s.tasks;
+        var idx = Math.max(0, Math.min(Number(s.currentTaskIndex) || 0, tasks.length));
+        if (idx < tasks.length && tasks[idx].status !== 'pending') {
+          while (idx < tasks.length && tasks[idx].status !== 'pending') idx++;
+        }
+        if (idx >= tasks.length) idx = tasks.length;
+        var vis = Array.isArray(s.visibleDrugIds) ? s.visibleDrugIds.slice() : null;
+        var cand = idx < tasks.length ? candidateIdsForTask(tasks[idx]) : [];
+        if (!vis || vis.length === 0) {
+          vis = cand.length ? [cand[0]] : [];
+        }
+        vis = vis.filter(function (id) { return cand.indexOf(id) !== -1; });
+        if (vis.length === 0 && cand.length) vis = [cand[0]];
+        if (vis.length > MAX_SLOTS) vis = vis.slice(0, MAX_SLOTS);
+        var sel = s.selectedDrugId;
+        if (sel && cand.indexOf(sel) === -1) sel = null;
+        return {
+          version: 2,
+          tasks: tasks,
+          currentTaskIndex: idx,
+          visibleDrugIds: vis,
+          selectedDrugId: sel || null
+        };
       }
 
       var state = normalizeState(loadState() || defaultState());
@@ -706,9 +1437,20 @@
         saveState(state);
       }
 
+      function isAllDone() {
+        return state.currentTaskIndex >= state.tasks.length;
+      }
+
+      function getCurrentTask() {
+        if (state.currentTaskIndex >= state.tasks.length) return null;
+        return state.tasks[state.currentTaskIndex];
+      }
+
       function drugById(id) {
-        for (var i = 0; i < DRUG_CANDIDATES.length; i++) {
-          if (DRUG_CANDIDATES[i].id === id) return DRUG_CANDIDATES[i];
+        var t = getCurrentTask();
+        if (!t || !t.candidates) return null;
+        for (var i = 0; i < t.candidates.length; i++) {
+          if (t.candidates[i].id === id) return t.candidates[i];
         }
         return null;
       }
@@ -729,6 +1471,7 @@
 
       function onlyShow(id) {
         state.visibleDrugIds = [id];
+        if (state.selectedDrugId && state.selectedDrugId !== id) state.selectedDrugId = null;
         persist();
         renderAll();
       }
@@ -748,29 +1491,138 @@
         var idx = state.visibleDrugIds.indexOf(id);
         if (idx === -1) return;
         state.visibleDrugIds.splice(idx, 1);
-        if (state.visibleDrugIds.length === 0) {
-          state.visibleDrugIds = [DRUG_CANDIDATES[0].id];
+        var cand = candidateIdsForTask(getCurrentTask());
+        if (state.visibleDrugIds.length === 0 && cand.length) {
+          state.visibleDrugIds = [cand[0]];
+        }
+        if (state.selectedDrugId === id) state.selectedDrugId = null;
+        persist();
+        renderAll();
+      }
+
+      function setSelected(id) {
+        state.selectedDrugId = id || null;
+        persist();
+        updateActionButtons();
+      }
+
+      function onPickChange(cid) {
+        var el = document.getElementById('pick-' + cid);
+        if (!el) return;
+        if (!el.checked) {
+          if (state.selectedDrugId === cid) {
+            state.selectedDrugId = null;
+            persist();
+          }
+          updateActionButtons();
+          renderDrugGrid();
+          renderBookmarks();
+          return;
+        }
+        var ids = state.visibleDrugIds.slice();
+        for (var i = 0; i < ids.length; i++) {
+          var o = document.getElementById('pick-' + ids[i]);
+          if (o && ids[i] !== cid) o.checked = false;
+        }
+        setSelected(cid);
+        renderDrugGrid();
+        renderBookmarks();
+      }
+
+      function advanceAfterResolve(update) {
+        var t = getCurrentTask();
+        if (!t) return;
+        update(t);
+        state.currentTaskIndex++;
+        state.selectedDrugId = null;
+        if (state.currentTaskIndex < state.tasks.length) {
+          var next = state.tasks[state.currentTaskIndex];
+          var cand = candidateIdsForTask(next);
+          state.visibleDrugIds = cand.length ? [cand[0]] : [];
+        } else {
+          state.visibleDrugIds = [];
         }
         persist();
         renderAll();
       }
 
+      function onMatchSuccess() {
+        if (isAllDone()) return;
+        if (!state.selectedDrugId) {
+          showToast('请先勾选一个 DrugID 商品作为匹配结果');
+          return;
+        }
+        var d = drugById(state.selectedDrugId);
+        if (!d) return;
+        advanceAfterResolve(function (task) {
+          task.status = 'matched';
+          task.matchedDrugId = d.drugId;
+          task.matchedDrugName = d.name;
+          task.resolvedAt = new Date().toISOString();
+        });
+      }
+
+      function onNewDrug() {
+        if (isAllDone()) return;
+        advanceAfterResolve(function (task) {
+          task.status = 'new_drug';
+          task.matchedDrugId = null;
+          task.matchedDrugName = null;
+          task.resolvedAt = new Date().toISOString();
+        });
+      }
+
+      function updateActionButtons() {
+        var btnOk = document.getElementById('btnMatchOk');
+        var btnNew = document.getElementById('btnNewDrug');
+        var done = isAllDone();
+        if (btnOk) btnOk.disabled = done || !state.selectedDrugId;
+        if (btnNew) btnNew.disabled = done;
+      }
+
+      function renderProgress() {
+        var total = state.tasks.length;
+        var idx = Math.min(state.currentTaskIndex, total);
+        var remaining = Math.max(0, total - idx);
+        var done = total - remaining;
+        var pct = total === 0 ? 100 : Math.round((done / total) * 100);
+        var fill = document.getElementById('progressFill');
+        var tx = document.getElementById('progressText');
+        var fr = document.getElementById('progressFraction');
+        var wrap = document.getElementById('progressWrap');
+        if (isAllDone()) {
+          if (fill) fill.style.width = '100%';
+          if (tx) tx.textContent = '已全部完成';
+          if (fr) fr.textContent = total + ' / ' + total;
+          if (wrap) wrap.style.opacity = '0.85';
+        } else {
+          if (fill) fill.style.width = pct + '%';
+          if (tx) tx.textContent = '还剩 ' + remaining + ' 条待匹配';
+          if (fr) fr.textContent = '已完成 ' + done + ' / 共 ' + total;
+          if (wrap) wrap.style.opacity = '1';
+        }
+      }
+
       function renderMeituan() {
         var el = document.getElementById('meituanCol');
-        var imgs = MEITUAN_PRODUCT.images.slice(0, 6);
+        if (isAllDone()) {
+          el.innerHTML = '';
+          return;
+        }
+        var m = getCurrentTask().meituan;
+        var imgs = (m.images || []).slice(0, 6);
         el.innerHTML =
           '<div class="col-head">' +
           '<span class="pill-meituan">美团商品</span>' +
-          '<span style="font-size:0.8rem;color:var(--muted)">唯一资料 · 对码参考</span>' +
           '</div>' +
           '<div class="col-body">' +
-          '<h2 class="product-title">' + escapeHtml(MEITUAN_PRODUCT.name) + '</h2>' +
+          '<h2 class="product-title">' + escapeHtml(m.name) + '</h2>' +
           '<div class="meta-grid">' +
-          metaCard('规格', MEITUAN_PRODUCT.spec, false) +
-          metaCard('条形码', MEITUAN_PRODUCT.barcode, false) +
-          metaCard('批准文号', MEITUAN_PRODUCT.approvalNo, true) +
-          metaCard('生产厂家', MEITUAN_PRODUCT.manufacturer, false) +
-          metaCard('处方分类', MEITUAN_PRODUCT.rxCategory, false) +
+          metaCard('规格', m.spec, false) +
+          metaCard('条形码 / UPC', m.barcode, false) +
+          metaCard('批准文号', m.approvalNo, true) +
+          metaCard('生产厂家', m.manufacturer, false) +
+          metaCard('处方分类', m.rxCategory, false) +
           '</div>' +
           '<div class="meta-label" style="margin-bottom:6px">商品图片（最多 6 张）</div>' +
           '<div class="gallery">' +
@@ -800,8 +1652,62 @@
         return escapeHtml(s).replace(/'/g, '&#39;');
       }
 
+      function confidenceLevel(item) {
+        if (item && item.confidence) return item.confidence;
+        var raw = String((item && (item.id || item.drugId)) || '0').replace(/\D/g, '');
+        var last = Number(raw.charAt(raw.length - 1) || 0);
+        if (last === 1 || last === 4 || last === 8) return 'high';
+        if (last === 2 || last === 5 || last === 9) return 'medium';
+        return 'low';
+      }
+
+      function confidenceText(level) {
+        if (level === 'high') return '高置信度';
+        if (level === 'medium') return '中置信度';
+        return '低置信度';
+      }
+
+      function confidenceRank(item) {
+        var level = confidenceLevel(item);
+        if (level === 'high') return 0;
+        if (level === 'medium') return 1;
+        return 2;
+      }
+
+      function confidenceTag(item) {
+        var level = confidenceLevel(item);
+        return (
+          '<span class="confidence-tag confidence-' +
+          escapeAttr(level) +
+          '">' +
+          escapeHtml(confidenceText(level)) +
+          '</span>'
+        );
+      }
+
+      function displayDrugCode(drugId) {
+        return String(drugId || '').replace(/^DRUG-/i, '');
+      }
+
+      function drugIdentity(item, mode) {
+        var cls = mode === 'bookmark' ? 'bm-title' : 'drug-name-inline';
+        return (
+          '<div class="' +
+          cls +
+          '"><span class="drug-code">【' +
+          escapeHtml(displayDrugCode(item.drugId)) +
+          '】</span>' +
+          escapeHtml(item.name) +
+          '</div>'
+        );
+      }
+
       function renderDrugGrid() {
         var grid = document.getElementById('drugGrid');
+        if (isAllDone()) {
+          grid.innerHTML = '';
+          return;
+        }
         var n = state.visibleDrugIds.length;
         var slots = Math.min(MAX_SLOTS, Math.max(1, n));
         grid.setAttribute('data-slots', String(slots));
@@ -814,7 +1720,21 @@
       }
 
       function renderDrugSlot(d) {
+        var checked = state.selectedDrugId === d.id;
         var imgs = (d.images || []).slice(0, 6);
+        var pick =
+          '<label class="pick-row">' +
+          '<input type="checkbox" id="pick-' +
+          escapeAttr(d.id) +
+          '" data-cid="' +
+          escapeAttr(d.id) +
+          '" ' +
+          (checked ? 'checked' : '') +
+          ' onchange="window.__app.pick(\'' +
+          escapeAttr(d.id) +
+          '\')" />' +
+          '<span>选中为匹配商品</span>' +
+          '</label>';
         var meta =
           '<div class="meta-grid-drug">' +
           tiny('规格', d.spec) +
@@ -832,14 +1752,17 @@
             .join('') +
           '</div>';
         return (
-          '<div class="drug-slot">' +
+          '<div class="drug-slot' +
+          (checked ? ' is-picked' : '') +
+          '" data-cid="' +
+          escapeAttr(d.id) +
+          '">' +
           '<div class="drug-slot-inner">' +
-          '<div class="drug-id" style="font-size:0.7rem;font-weight:700;color:var(--drug)">' +
-          escapeHtml(d.drugId) +
+          pick +
+          '<div class="drug-identity">' +
+          drugIdentity(d, 'slot') +
+          confidenceTag(d) +
           '</div>' +
-          '<h3 class="drug-title">' +
-          escapeHtml(d.name) +
-          '</h3>' +
           meta +
           gal +
           '</div></div>'
@@ -858,7 +1781,17 @@
 
       function renderBookmarks() {
         var list = document.getElementById('bookmarkList');
-        list.innerHTML = DRUG_CANDIDATES.map(function (c) {
+        if (isAllDone()) {
+          list.innerHTML = '';
+          return;
+        }
+        var t = getCurrentTask();
+        var candidates = (t.candidates || []).slice().sort(function (a, b) {
+          var diff = confidenceRank(a) - confidenceRank(b);
+          if (diff !== 0) return diff;
+          return String(a.drugId || '').localeCompare(String(b.drugId || ''));
+        });
+        list.innerHTML = candidates.map(function (c) {
           var visible = isVisible(c.id);
           var joinLabel = visible ? '退出展示' : '加入展示';
           var joinClass = visible ? 'btn btn-danger' : 'btn btn-primary';
@@ -871,11 +1804,9 @@
             '<div class="bm-card' + (visible ? ' is-visible' : '') + '" data-id="' +
             escapeAttr(c.id) +
             '">' +
-            '<div class="bm-id">' +
-            escapeHtml(c.drugId) +
-            '</div>' +
-            '<div class="bm-name">' +
-            escapeHtml(c.name) +
+            '<div class="bm-identity">' +
+            drugIdentity(c, 'bookmark') +
+            confidenceTag(c) +
             '</div>' +
             '<div class="bm-actions">' +
             '<button type="button" class="btn btn-secondary" onclick="window.__app.only(\'' +
@@ -894,25 +1825,52 @@
         }).join('');
       }
 
+      function renderDoneVisibility() {
+        var wb = document.getElementById('workbench');
+        var ds = document.getElementById('doneScreen');
+        if (isAllDone()) {
+          if (wb) wb.classList.add('hide');
+          if (ds) ds.classList.add('show');
+        } else {
+          if (wb) wb.classList.remove('hide');
+          if (ds) ds.classList.remove('show');
+        }
+      }
+
       function renderAll() {
+        if (!state.visibleDrugIds || !state.visibleDrugIds.length) {
+          var t = getCurrentTask();
+          if (t) {
+            var c = candidateIdsForTask(t);
+            state.visibleDrugIds = c.length ? [c[0]] : [];
+          } else state.visibleDrugIds = [];
+        }
+        renderProgress();
+        renderDoneVisibility();
         renderMeituan();
         renderDrugGrid();
         renderBookmarks();
+        updateActionButtons();
       }
 
+      var histHref = 'history.html?v=' + encodeURIComponent(VERSION);
+      var hl = document.getElementById('historyLink');
+      var hl2 = document.getElementById('historyLink2');
+      var sideHl = document.getElementById('sideHistoryLink');
+      if (hl) hl.setAttribute('href', histHref);
+      if (hl2) hl2.setAttribute('href', histHref);
+      if (sideHl) sideHl.setAttribute('href', histHref);
+
+      document.getElementById('btnMatchOk').addEventListener('click', onMatchSuccess);
+      document.getElementById('btnNewDrug').addEventListener('click', onNewDrug);
+
       window.__app = {
-        only: function (id) {
-          onlyShow(id);
-        },
-        add: function (id) {
-          addToDisplay(id);
-        },
-        remove: function (id) {
-          removeFromDisplay(id);
-        }
+        only: onlyShow,
+        add: addToDisplay,
+        remove: removeFromDisplay,
+        pick: onPickChange
       };
 
-      document.getElementById('versionLabel').textContent = '资源版本 v' + VERSION;
       renderAll();
     })();
   </script>
